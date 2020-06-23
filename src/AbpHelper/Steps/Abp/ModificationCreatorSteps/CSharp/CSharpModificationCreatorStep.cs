@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyAbp.AbpHelper.Generator;
 using EasyAbp.AbpHelper.Models;
 using EasyAbp.AbpHelper.Steps.Common;
 using Elsa.Expressions;
@@ -15,6 +16,13 @@ namespace EasyAbp.AbpHelper.Steps.Abp.ModificationCreatorSteps.CSharp
 {
     public abstract class CSharpModificationCreatorStep : Step
     {
+        protected TextGenerator TextGenerator;
+
+        protected CSharpModificationCreatorStep(TextGenerator textGenerator)
+        {
+            TextGenerator = textGenerator;
+        }
+
         public WorkflowExpression<string> SourceFile
         {
             get => GetState(() => new JavaScriptExpression<string>(FileFinderStep.DefaultFileParameterName));
@@ -23,15 +31,15 @@ namespace EasyAbp.AbpHelper.Steps.Abp.ModificationCreatorSteps.CSharp
 
         protected override async Task<ActivityExecutionResult> OnExecuteAsync(WorkflowExecutionContext context, CancellationToken cancellationToken)
         {
-            var file = await context.EvaluateAsync(SourceFile, cancellationToken);
+            string file = await context.EvaluateAsync(SourceFile, cancellationToken);
             LogInput(() => file);
 
-            var sourceText = await File.ReadAllTextAsync(file, cancellationToken);
-            var tree = CSharpSyntaxTree.ParseText(sourceText);
-            var root = tree.GetCompilationUnitRoot();
+            string sourceText = await File.ReadAllTextAsync(file, cancellationToken);
+            Microsoft.CodeAnalysis.SyntaxTree tree = CSharpSyntaxTree.ParseText(sourceText);
+            Microsoft.CodeAnalysis.CSharp.Syntax.CompilationUnitSyntax root = tree.GetCompilationUnitRoot();
 
-            var builders = CreateModifications(context);
-            var modifications = builders
+            IList<ModificationBuilder<CSharpSyntaxNode>> builders = CreateModifications(context);
+            List<Modification> modifications = builders
                     .Where(builder => builder.ModifyCondition(root))
                     .Select(builder => builder.Build(root))
                     .ToList()

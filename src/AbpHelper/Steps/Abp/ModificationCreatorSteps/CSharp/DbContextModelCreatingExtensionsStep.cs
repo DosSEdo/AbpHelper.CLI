@@ -4,6 +4,7 @@ using EasyAbp.AbpHelper.Extensions;
 using EasyAbp.AbpHelper.Generator;
 using EasyAbp.AbpHelper.Models;
 using Elsa.Services.Models;
+using JetBrains.Annotations;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -13,11 +14,11 @@ namespace EasyAbp.AbpHelper.Steps.Abp.ModificationCreatorSteps.CSharp
     {
         protected override IList<ModificationBuilder<CSharpSyntaxNode>> CreateModifications(WorkflowExecutionContext context)
         {
-            var model = context.GetVariable<object>("Model");
-            var entityUsingText = context.GetVariable<string>("EntityUsingText");
+            object model = context.GetVariable<object>("Model");
+            string entityUsingText = context.GetVariable<string>("EntityUsingText");
             string templateDir = context.GetVariable<string>("TemplateDirectory");
-            var modelingUsingText = TextGenerator.GenerateByTemplateName(templateDir, "DbContextModelCreatingExtensions_Using", model);
-            var entityConfigText = TextGenerator.GenerateByTemplateName(templateDir, "DbContextModelCreatingExtensions_EntityConfig", model);
+            string modelingUsingText = TextGenerator.GenerateByTemplateName(templateDir, "DbContextModelCreatingExtensions_Using", model);
+            string entityConfigText = TextGenerator.GenerateByTemplateName(templateDir, "DbContextModelCreatingExtensions_EntityConfig", model);
 
             return new List<ModificationBuilder<CSharpSyntaxNode>>
             {
@@ -37,6 +38,10 @@ namespace EasyAbp.AbpHelper.Steps.Abp.ModificationCreatorSteps.CSharp
                     modifyCondition: root => root.Descendants<MethodDeclarationSyntax>().First().NotContains(entityConfigText)
                 )
             };
+        }
+
+        public DbContextModelCreatingExtensionsStep([NotNull] TextGenerator textGenerator) : base(textGenerator)
+        {
         }
     }
 }

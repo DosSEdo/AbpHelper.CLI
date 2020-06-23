@@ -4,6 +4,7 @@ using EasyAbp.AbpHelper.Extensions;
 using EasyAbp.AbpHelper.Generator;
 using EasyAbp.AbpHelper.Models;
 using Elsa.Services.Models;
+using JetBrains.Annotations;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -13,7 +14,7 @@ namespace EasyAbp.AbpHelper.Steps.Abp.ModificationCreatorSteps.CSharp
     {
         protected override IList<ModificationBuilder<CSharpSyntaxNode>> CreateModifications(WorkflowExecutionContext context)
         {
-            var model = context.GetVariable<object>("Model");
+            object model = context.GetVariable<object>("Model");
             string entityUsingText = context.GetVariable<string>("EntityUsingText");
             string templateDir = context.GetVariable<string>("TemplateDirectory");
             string dbContextPropertyText = TextGenerator.GenerateByTemplateName(templateDir, "DbContextClass_Property", model);
@@ -32,6 +33,10 @@ namespace EasyAbp.AbpHelper.Steps.Abp.ModificationCreatorSteps.CSharp
                     modifyCondition: root => root.DescendantsNotContain<PropertyDeclarationSyntax>(dbContextPropertyText)
                 )
             };
+        }
+
+        public DbContextClassStep([NotNull] TextGenerator textGenerator) : base(textGenerator)
+        {
         }
     }
 }

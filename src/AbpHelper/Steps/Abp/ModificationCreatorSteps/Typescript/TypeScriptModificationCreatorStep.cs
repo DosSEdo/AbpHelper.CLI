@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyAbp.AbpHelper.Generator;
 using EasyAbp.AbpHelper.Models;
 using EasyAbp.AbpHelper.Steps.Common;
 using Elsa.Expressions;
@@ -14,6 +15,13 @@ namespace EasyAbp.AbpHelper.Steps.Abp.ModificationCreatorSteps.Typescript
 {
     public abstract class TypeScriptModificationCreatorStep : Step
     {
+        protected TextGenerator TextGenerator;
+
+        protected TypeScriptModificationCreatorStep(TextGenerator textGenerator)
+        {
+            TextGenerator = textGenerator;
+        }
+
         public WorkflowExpression<string> SourceFile
         {
             get => GetState(() => new JavaScriptExpression<string>(FileFinderStep.DefaultFileParameterName));
@@ -23,16 +31,16 @@ namespace EasyAbp.AbpHelper.Steps.Abp.ModificationCreatorSteps.Typescript
         protected override async Task<ActivityExecutionResult> OnExecuteAsync(WorkflowExecutionContext context,
             CancellationToken cancellationToken)
         {
-            var file = await context.EvaluateAsync(SourceFile, cancellationToken);
+            string file = await context.EvaluateAsync(SourceFile, cancellationToken);
             LogInput(() => file);
 
-            var lines = (await File.ReadAllLinesAsync(file, cancellationToken))
+            IEnumerable<LineNode> lines = (await File.ReadAllLinesAsync(file, cancellationToken))
                     .Select((l, s) => new LineNode(l, s + 1))
                 ;
 
-            var builders = CreateModifications(context);
+            IList<ModificationBuilder<IEnumerable<LineNode>>> builders = CreateModifications(context);
 
-            var modifications = builders
+            List<Modification> modifications = builders
                     .Where(builder => builder.ModifyCondition(lines))
                     .Select(builder => builder.Build(lines))
                     .ToList()

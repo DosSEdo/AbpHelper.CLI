@@ -3,6 +3,7 @@ using System.Linq;
 using EasyAbp.AbpHelper.Generator;
 using EasyAbp.AbpHelper.Models;
 using Elsa.Services.Models;
+using JetBrains.Annotations;
 
 namespace EasyAbp.AbpHelper.Steps.Abp.ModificationCreatorSteps.Typescript
 {
@@ -11,8 +12,8 @@ namespace EasyAbp.AbpHelper.Steps.Abp.ModificationCreatorSteps.Typescript
         protected override IList<ModificationBuilder<IEnumerable<LineNode>>> CreateModifications(
             WorkflowExecutionContext context)
         {
-            var model = context.GetVariable<object>("Model");
-            var entityInfo = context.GetVariable<EntityInfo>("EntityInfo");
+            object model = context.GetVariable<object>("Model");
+            EntityInfo entityInfo = context.GetVariable<EntityInfo>("EntityInfo");
             string templateDir = context.GetVariable<string>("TemplateDirectory");
             string importContents = TextGenerator.GenerateByTemplateName(templateDir, "AppRoutingModule_ImportApplicationLayoutComponent", model);
             string routeContents = TextGenerator.GenerateByTemplateName(templateDir, "AppRoutingModule_Routing", model);
@@ -33,6 +34,10 @@ namespace EasyAbp.AbpHelper.Steps.Abp.ModificationCreatorSteps.Typescript
                     routeContents
                 )
             };
+        }
+
+        public AppRoutingModuleStep([NotNull] TextGenerator textGenerator) : base(textGenerator)
+        {
         }
     }
 }

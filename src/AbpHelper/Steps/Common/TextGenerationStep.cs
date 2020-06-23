@@ -10,6 +10,7 @@ namespace EasyAbp.AbpHelper.Steps.Common
 {
     public class TextGenerationStep : Step
     {
+        private readonly TextGenerator _textGenerator;
         public const string DefaultGeneratedTextParameterName = "GeneratedText";
 
         public WorkflowExpression<string> TemplateDirectory
@@ -36,17 +37,22 @@ namespace EasyAbp.AbpHelper.Steps.Common
             set => SetState(value);
         }
 
+        public TextGenerationStep(TextGenerator textGenerator)
+        {
+            _textGenerator = textGenerator;
+        }
+
         protected override async Task<ActivityExecutionResult> OnExecuteAsync(WorkflowExecutionContext context, CancellationToken cancellationToken)
         {
             string templateDir = await context.EvaluateAsync(TemplateDirectory, cancellationToken);
             LogInput(() => templateDir);
             LogInput(() => TemplateName);
-            var model = await context.EvaluateAsync(Model, cancellationToken);
+            object model = await context.EvaluateAsync(Model, cancellationToken);
             LogInput(() => model);
-            var generatedTextKey = await context.EvaluateAsync(GeneratedTextKey, cancellationToken);
+            string generatedTextKey = await context.EvaluateAsync(GeneratedTextKey, cancellationToken);
             LogInput(() => GeneratedTextKey);
 
-            var text = TextGenerator.GenerateByTemplateName(templateDir, TemplateName, model);
+            string text = _textGenerator.GenerateByTemplateName(templateDir, TemplateName, model);
 
             context.SetLastResult(text);
             context.SetVariable(generatedTextKey, text);
