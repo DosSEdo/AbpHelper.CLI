@@ -2,7 +2,8 @@
   "profiles": {
     "AbpHelper": {
       "commandName": "Project",
-      "commandLineArgs": "generate crud Invoice -d C:\\DosSE\\MyAbpApp1"
+      "commandLineArgs": "generate crud Siblings",
+      "workingDirectory": "C:\\Users\\blyzer\\Documents\\GitHub\\HealthProfile\\aspnet-core"
     }
   }
 }

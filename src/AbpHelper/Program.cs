@@ -1,14 +1,13 @@
 ﻿using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
 using System.Threading.Tasks;
-using DosSEdo.AbpHelper.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Events;
 using Volo.Abp;
-using CommandLineBuilder = DosSEdo.AbpHelper.Commands.CommandLineBuilder;
+using CommandLineBuilder = EasyAbp.AbpHelper.Core.Commands.CommandLineBuilder;
 
-namespace DosSEdo.AbpHelper
+namespace EasyAbp.AbpHelper
 {
     internal class Program
     {
@@ -23,7 +22,7 @@ namespace DosSEdo.AbpHelper
                 .CreateLogger();
 
 
-            using (IAbpApplicationWithInternalServiceProvider application = AbpApplicationFactory.Create<AbpHelperModule>(options =>
+            using (var application = AbpApplicationFactory.Create<AbpHelperModule>(options =>
             {
                 options.UseAutofac();
                 options.Services.AddLogging(c => c.AddSerilog());
@@ -31,8 +30,8 @@ namespace DosSEdo.AbpHelper
             {
                 application.Initialize();
 
-                Parser parser = new CommandLineBuilder(application.ServiceProvider, "abphelper")
-                    .AddCommand<GenerateCommand>()
+                var parser = new CommandLineBuilder(application.ServiceProvider, "abphelper")
+                    .AddAllRootCommands()
                     .UseDefaults()
                     .Build();
 
